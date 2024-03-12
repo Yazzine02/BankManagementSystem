@@ -13,5 +13,6 @@ int main(){
 	}else {
 		cout << "Username test is not taken" << endl;
 	}
+	
 	return 0;
 }

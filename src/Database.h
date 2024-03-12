@@ -18,7 +18,8 @@ public:
 	bool isPasswordTaken(const  string& password);
 	//USER AUTHENTICATION
 	bool createUser(const string& username,const string& password);
-	bool loginUser(const string& username,const string& password);
+	//bool loginUser(const string& username,const string& password);
+	//TOOLS
 };
 
 #endif // DATABASE_H

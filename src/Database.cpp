@@ -27,11 +27,13 @@ Database::~Database() {
 bool Database::isUsernameTaken(const string& username){//true if username taken
     const char* checkUsernameQuery = "SELECT COUNT(*) FROM client WHERE username=?;";
     sqlite3_stmt* statement;//step 1
+
     if(sqlite3_prepare_v2(db,checkUsernameQuery,-1,&statement,0) != SQLITE_OK){//step 2 and 6
         sqlite3_finalize(statement);
         return false;
     }else{
         sqlite3_bind_text(statement,1,username.c_str(),-1,SQLITE_STATIC);//step 3
+        
         if(sqlite3_step(statement) == SQLITE_ROW){//step 4
             int count = sqlite3_column_int(statement,0);
             sqlite3_finalize(statement);//step 6
@@ -44,6 +46,7 @@ bool Database::isUsernameTaken(const string& username){//true if username taken
 bool Database::isPasswordTaken(const string& password){
     const char* checkPasswordQuery = "SELECT COUNT(*) FROM client WHERE password = ?;";
     sqlite3_stmt* statement;
+
     if(sqlite3_prepare_v2(db,checkPasswordQuery,-1,&statement,0) == SQLITE_OK){
         sqlite3_bind_text(statement,1,password.c_str(),-1,SQLITE_STATIC);
         if(sqlite3_step(statement) == SQLITE_ROW){
@@ -56,5 +59,26 @@ bool Database::isPasswordTaken(const string& password){
     return false;
 }
 //USER AUTHENTICATION
-bool Database::createUser(const string& username,const string& password){}
-bool Database::loginUser(const string& username,const string& password){}
+bool Database::createUser(const string& username,const string& password){
+    if(isUsernameTaken(username) || isPasswordTaken(password)){
+        cerr << "Username or Password is already taken." << endl;
+        return false;
+    }
+    const char* createUserQuery = "INSERT INTO client (username,password) VALUES (?, ?);";
+    sqlite3_stmt* statement;
+
+    if(sqlite3_prepare_v2(db,createUserQuery,-1,&statement,0) == SQLITE_OK){
+        sqlite3_bind_text(statement,1,username.c_str(),-1,SQLITE_STATIC);
+        sqlite3_bind_text(statement,2,password.c_str(),-1,SQLITE_STATIC);
+
+        if(sqlite3_step(statement) == SQLITE_DONE){
+            cout << "User created successfully" << endl;
+            sqlite3_finalize(statement);
+            return true;
+        }
+    }
+    cerr << "Error creating new user: " << sqlite3_errmsg(db) << endl;
+    sqlite3_finalize(statement);
+    return false;
+}
+//bool Database::loginUser(const string& username,const string& password){}
