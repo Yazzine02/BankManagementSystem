@@ -1,17 +1,22 @@
 #include "Database.h"
 //CONSTRUCTORS
-Database::Database(const string &dbName) {
-    if (sqlite3_open(dbName.c_str(), &db) != SQLITE_OK) {
-        cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
+Database::Database(const string& dbPath,const string& errorLogPath,const string& successLogPath)
+        :logger(errorLogPath,successLogPath) {
+    if (sqlite3_open(dbPath.c_str(), &db) != SQLITE_OK) {
+        //cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
+        logger.logError("Error opening database: " + string(sqlite3_errmsg(db)));
     } else {
-        cout << "Database connection established successfully." << endl;
+        //cout << "Database connection established successfully." << endl;
+        logger.logSuccess("Database connection established successfully.");
     }
 }
 Database::~Database() {
     if (sqlite3_close(db) != SQLITE_OK) {
-        cerr << "Error closing database: " << sqlite3_errmsg(db) << endl;
+        //cerr << "Error closing database: " << sqlite3_errmsg(db) << endl;
+        logger.logError("Error closing database: " + string(sqlite3_errmsg(db)));
     } else {
-        cout << "Database connection closed." << endl;
+        //cout << "Database connection closed." << endl;
+        logger.logSuccess("Database connection closed.");
     }
 }
 
@@ -62,6 +67,7 @@ bool Database::isPasswordTaken(const string& password){
 bool Database::createUser(const string& username,const string& password){
     if(isUsernameTaken(username) || isPasswordTaken(password)){
         cerr << "Username or Password is already taken." << endl;
+        logger.logError("Username or Password is already taken.");
         return false;
     }
     const char* createUserQuery = "INSERT INTO client (username,password) VALUES (?, ?);";
@@ -72,13 +78,42 @@ bool Database::createUser(const string& username,const string& password){
         sqlite3_bind_text(statement,2,password.c_str(),-1,SQLITE_STATIC);
 
         if(sqlite3_step(statement) == SQLITE_DONE){
-            cout << "User created successfully" << endl;
+            cout << "User created successfully." << endl;
+            logger.logSuccess("User created successfully.");
+            logger.logSuccess("Username: "+username);
+            logger.logSuccess("Password: "+password);
             sqlite3_finalize(statement);
             return true;
         }
     }
-    cerr << "Error creating new user: " << sqlite3_errmsg(db) << endl;
+    //cerr << "Error creating new user: " << sqlite3_errmsg(db) << endl;
+    logger.logError("Error creating new user: "+string(sqlite3_errmsg(db)));
     sqlite3_finalize(statement);
     return false;
 }
-//bool Database::loginUser(const string& username,const string& password){}
+bool Database::loginUser(const string& username,const string& password){
+    const char* loginUserQuery = "SELECT COUNT(*) FROM client WHERE username=? AND password=?;";
+    sqlite3_stmt* statement;
+
+    if(sqlite3_prepare_v2(db,loginUserQuery,-1,&statement,0) == SQLITE_OK){
+        sqlite3_bind_text(statement,1,username.c_str(),-1,SQLITE_STATIC);
+        sqlite3_bind_text(statement,2,password.c_str(),-1,SQLITE_STATIC);
+
+        if(sqlite3_step(statement) == SQLITE_ROW){
+            int count = sqlite3_column_int(statement,0);
+            sqlite3_finalize(statement);
+            cout << "Logged in successfully.";
+            logger.logSuccess("Logged in successfully.");
+            logger.logSuccess("Username: "+username);
+            logger.logSuccess("Password: "+password);
+            return count > 0;
+        }
+        //cerr << "Username or Password is wrong." << endl;
+        logger.logError("Username or Password is wrong.");
+        return false;
+    }
+    //cerr << "Error during login: " << sqlite3_errmsg(db) << endl;
+    logger.logError("Error during login: " + string(sqlite3_errmsg(db)));
+    sqlite3_finalize(statement);
+    return false;
+}
