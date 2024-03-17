@@ -16,16 +16,16 @@ class ATM{
 		//Constructor
 		ATM(const string& dbPath,const string& errorLogPath,const string& successLogPath);
 		//authentication interfaces
-		void Login();
-		void SignIn();
-		void Logout();
+		void login(string& username,string& password);
+		void signin(string& username,string& password);
+		void logout();
 		//Utility Interfaces
 		//void Balance()const;
 		//void Deposit();
 		//void Borrow();
 		//void ReturnLoan();
 		//void Withdraw();
-		void Checkinfo()const;
+		void checkinfo()const;
 
 };
 
