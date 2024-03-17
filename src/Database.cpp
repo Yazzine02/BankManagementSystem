@@ -94,7 +94,11 @@ bool Database::createUser(const string& username,const string& password){
 bool Database::loginUser(const string& username,const string& password){
     const char* loginUserQuery = "SELECT COUNT(*) FROM client WHERE username=? AND password=?;";
     sqlite3_stmt* statement;
-
+	/*
+	By using parameterized queries, the SQLite library ensures that user input is properly 
+	sanitized, reducing the risk of SQL injection attacks. Always validate and sanitize user 
+	input before using it in SQL queries to protect your application from security vulnerabilities.
+	*/
     if(sqlite3_prepare_v2(db,loginUserQuery,-1,&statement,0) == SQLITE_OK){
         sqlite3_bind_text(statement,1,username.c_str(),-1,SQLITE_STATIC);
         sqlite3_bind_text(statement,2,password.c_str(),-1,SQLITE_STATIC);
@@ -102,14 +106,20 @@ bool Database::loginUser(const string& username,const string& password){
         if(sqlite3_step(statement) == SQLITE_ROW){
             int count = sqlite3_column_int(statement,0);
             sqlite3_finalize(statement);
-            cout << "Logged in successfully.";
-            logger.logSuccess("Logged in successfully.");
-            logger.logSuccess("Username: "+username);
-            logger.logSuccess("Password: "+password);
+            if(count!=1){
+            	cout << "Username or Password is wrong."<<endl;
+            	logger.logError("Username or Password is wrong.");
+            	logger.logSuccess("Username: "+username);
+            	logger.logSuccess("Password: "+password);
+            }else{
+            	cout << "Logged in successfully."<<endl;
+            	logger.logSuccess("Logged in successfully.");
+            	logger.logSuccess("Username: "+username);
+            	logger.logSuccess("Password: "+password);
+            }
             return count > 0;
         }
         //cerr << "Username or Password is wrong." << endl;
-        logger.logError("Username or Password is wrong.");
         return false;
     }
     //cerr << "Error during login: " << sqlite3_errmsg(db) << endl;
