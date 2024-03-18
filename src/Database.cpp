@@ -30,7 +30,7 @@ Database::~Database() {
     6-Destroy the object using sqlite3_finalize().
 */
 bool Database::isUsernameTaken(const string& username){//true if username taken
-    const char* checkUsernameQuery = "SELECT COUNT(*) FROM client WHERE username=?;";
+    const char* checkUsernameQuery = "SELECT COUNT(*) FROM Client WHERE username=?;";
     sqlite3_stmt* statement;//step 1
 
     if(sqlite3_prepare_v2(db,checkUsernameQuery,-1,&statement,0) != SQLITE_OK){//step 2 and 6
@@ -49,7 +49,7 @@ bool Database::isUsernameTaken(const string& username){//true if username taken
     }
 }
 bool Database::isPasswordTaken(const string& password){
-    const char* checkPasswordQuery = "SELECT COUNT(*) FROM client WHERE password = ?;";
+    const char* checkPasswordQuery = "SELECT COUNT(*) FROM Client WHERE password = ?;";
     sqlite3_stmt* statement;
 
     if(sqlite3_prepare_v2(db,checkPasswordQuery,-1,&statement,0) == SQLITE_OK){
@@ -65,32 +65,54 @@ bool Database::isPasswordTaken(const string& password){
 }
 //USER AUTHENTICATION
 bool Database::createUser(const string& username,const string& password){
+	//checking if username or password is taken
     if(isUsernameTaken(username) || isPasswordTaken(password)){
         cerr << "Username or Password is already taken." << endl;
         logger.logError("Username or Password is already taken.");
         return false;
     }
-    const char* createUserQuery = "INSERT INTO client (username,password) VALUES (?, ?);";
-    sqlite3_stmt* statement;
-
-    if(sqlite3_prepare_v2(db,createUserQuery,-1,&statement,0) == SQLITE_OK){
-        sqlite3_bind_text(statement,1,username.c_str(),-1,SQLITE_STATIC);
-        sqlite3_bind_text(statement,2,password.c_str(),-1,SQLITE_STATIC);
-
-        if(sqlite3_step(statement) == SQLITE_DONE){
-            cout << "User created successfully." << endl;
-            logger.logSuccess("User created successfully.");
-            logger.logSuccess("Username: "+username);
-            logger.logSuccess("Password: "+password);
-            sqlite3_finalize(statement);
-            return true;
+    	//queries
+    const char* createClientQuery = "INSERT INTO Client (username,password) VALUES (?, ?);";
+    const char* createAccountQuery = "INSERT INTO Account (account_id, balance) VALUES (?, ?);";
+    	//statements
+    sqlite3_stmt* client_statement;
+    sqlite3_stmt* account_statement;
+	//preparing BOTH statements
+    if(sqlite3_prepare_v2(db,createClientQuery,-1,&client_statement,0) == SQLITE_OK && sqlite3_prepare_v2(db,createAccountQuery,-1,&account_statement,0) == SQLITE_OK){
+    	//binding client statement with username and password
+        sqlite3_bind_text(client_statement,1,username.c_str(),-1,SQLITE_STATIC);
+        sqlite3_bind_text(client_statement,2,password.c_str(),-1,SQLITE_STATIC);
+	//executing client insertion and checking if it returns true
+        if(sqlite3_step(client_statement) == SQLITE_DONE){
+        	//Get client id from the inserted client row
+        	int client_id = sqlite3_last_insert_rowid(db);
+        	//binding account statement with user id and balance=0.0
+        	sqlite3_bind_int(account_statement,1,client_id);//this is an int bind
+        	sqlite3_bind_double(account_statement,2,0.0);//this is a double bind
+        	//executing account insertion and checking if it returns true
+        	if(sqlite3_step(account_statement) == SQLITE_DONE){
+        		cout << "User created successfully." << endl;
+		    	logger.logSuccess("User created successfully.");
+		    	logger.logSuccess("Username: "+username);
+		    	logger.logSuccess("Password: "+password);
+		    	//finalizing statements
+		    	sqlite3_finalize(client_statement);
+		    	sqlite3_finalize(account_statement);
+		    	return true;
+        	}else{
+		        cerr << "Error creating account for the user." << endl;
+			logger.logError("Error creating account for the user.");
+		}
         }
     }
-    //cerr << "Error creating new user: " << sqlite3_errmsg(db) << endl;
+    cerr << "Error creating new user: " << sqlite3_errmsg(db) << endl;
     logger.logError("Error creating new user: "+string(sqlite3_errmsg(db)));
-    sqlite3_finalize(statement);
+    
+    sqlite3_finalize(client_statement);
+    sqlite3_finalize(account_statement);
     return false;
 }
+
 bool Database::loginUser(const string& username,const string& password){
     const char* loginUserQuery = "SELECT COUNT(*) FROM client WHERE username=? AND password=?;";
     sqlite3_stmt* statement;
