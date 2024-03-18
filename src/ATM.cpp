@@ -5,39 +5,44 @@ ATM::ATM(const string& dbPath,const string& errorLogPath,const string& successLo
 	while(continue_loop){
 		cout<<"Welcome to the ATM machine project!"<<endl;
 		cout<<"Select how you want to connect by entering the corresponding number: "<<endl;
-		cout<<"1.Login."<<endl;
-		cout<<"2.Sign up."<<endl;
-		cout<<"0.Quit the program."<<endl;
+		cout<<"1. Login."<<endl;
+		cout<<"2. Sign up."<<endl;
+		cout<<"0. Exit the program."<<endl;
 		//Necessary variables to store input data
 		int option = 0;
 		string username="",password="";
 		cin>>option;
 		cin.ignore();
 		switch(option){
-			case 1:{
+			case 1:{ //login functionality
 				login(username,password);
 				int user_id = db.getUserId(username,password);
 				if(user_id == -1)exit(EXIT_FAILURE);
 				Client client(user_id,username,password);
+				client_interface(client);
 				continue_loop=false;
 				break;
 			}
 				
-			case 2:{
+			case 2:{ //signup functionality
 				signup(username,password);
-			    continue_loop=false;
-			    break;
+				int user_id = db.getUserId(username,password);
+				if(user_id == -1)exit(EXIT_FAILURE);
+				Client client(user_id,username,password);
+				client_interface(client);
+			    	continue_loop=false;
+			    	break;
 			}
 			    
-			case 0:{
+			case 0:{ //exit program
 				cout << "Exiting the program. Goodbye!" << endl;
-			    exit(EXIT_SUCCESS);
-			    break;
+			    	exit(EXIT_SUCCESS);
+			    	break;
 			}
 			    
-			default:{
+			default:{ //invalid input
 				cout << "Invalid option. Please select a valid option." << endl;
-			    break;	
+			    	break;	
 			}
 			    
 		};
@@ -55,8 +60,7 @@ void ATM::login(string& username,string& password){
 		cout<<"Password:"<<endl;
 		cin>>password;
 		cin.ignore();
-		if(db.loginUser(username,password)){
-			cout<<"Welcome Mr.Ms "<<username<<endl;	
+		if(db.loginUser(username,password)){	
 			login_success=true;	
 		}else{
 			cout<<"Login Incorrect. "<< attempts - 1 << " attempts remaining." << endl;
@@ -81,17 +85,66 @@ void ATM::signup(string& username,string& password){
 		cout<<"Password:"<<endl;
 		cin>>password;
 		cin.ignore();
-		if(db.createUser(username,password)){
+		if(db.createUser(username,password)){ //executes when creating user in database successfully
 			cout<<"Created User successfully."<<endl;
 			createuser_success = true;
-		}else{
+		}else{ //diminishing number of attempts
 			cout<< attempts - 1 << " attempts remaining." << endl;
 			createuser_success=false;
 			attempts--;
 		}
 	}
-	if(attempts==0){
+	if(attempts==0){//3 false attempts => program exit
 		cout<<"Maximum number of sign in attempts reached. Exiting the program. Goodbye!"<<endl;
 		exit(EXIT_FAILURE);
+	}
+}
+
+void ATM::client_interface(Client& client){
+	bool exit_program = false;
+	while(!exit_program){
+		cout<<"Welcome Mr.Ms "<<client.get_username()<<endl;
+		cout<<"What can we do for you?" <<endl;
+		cout<<"1. Check credentials"<<endl;
+		//cout<<"2. Check balance"<<endl;
+		//cout<<"3. Deposit"<<endl;
+		//cout<<"4. Withdraw"<<endl;
+		cout<<"0. Exit"<<endl;
+		int option = 0;
+		cin >> option;
+		cin.ignore();
+		switch(option){
+			case 1:{ //checking credentials
+				cout<<"User ID: "<<client.get_userid()<<endl;
+				cout<<"Username: "<<client.get_username()<<endl;
+				break;
+			}
+				
+			/*case 2:{ //checking balance
+				
+			    	break;
+			}
+			
+			case 3:{ //deposit functionality
+				
+			    	break;
+			}
+			
+			case 4:{ //withdraw functionality
+				
+			    	break;
+			}
+			*/   
+			case 0:{ //exit program
+				cout << "Exiting the program. Goodbye!" << endl;
+			    	exit(EXIT_SUCCESS);
+			    	break;
+			}
+			    
+			default:{ //invalid input
+				cout << "Invalid option. Please select a valid option." << endl;
+			    	break;	
+			}
+		}
 	}
 }

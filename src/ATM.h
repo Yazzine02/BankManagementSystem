@@ -24,7 +24,7 @@ class ATM{
 		//void Borrow();
 		//void ReturnLoan();
 		//void Withdraw();
-		void checkinfo()const;
+		void client_interface(Client& client);
 
 };
 
