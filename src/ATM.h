@@ -10,14 +10,13 @@ using namespace std;
 
 class ATM{
 	private:
-		Client client;
 		Database db;
 	public:
 		//Constructor
 		ATM(const string& dbPath,const string& errorLogPath,const string& successLogPath);
 		//authentication interfaces
 		void login(string& username,string& password);
-		void signin(string& username,string& password);
+		void signup(string& username,string& password);
 		void logout();
 		//Utility Interfaces
 		//void Balance()const;

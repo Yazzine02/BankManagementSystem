@@ -14,21 +14,32 @@ ATM::ATM(const string& dbPath,const string& errorLogPath,const string& successLo
 		cin>>option;
 		cin.ignore();
 		switch(option){
-			case 1:
+			case 1:{
 				login(username,password);
+				int user_id = db.getUserId(username,password);
+				if(user_id == -1)exit(EXIT_FAILURE);
+				Client client(user_id,username,password);
 				continue_loop=false;
 				break;
-			case 2:
-			    signin(username,password);
+			}
+				
+			case 2:{
+				signup(username,password);
 			    continue_loop=false;
 			    break;
-			case 0:
-			    cout << "Exiting the program. Goodbye!" << endl;
+			}
+			    
+			case 0:{
+				cout << "Exiting the program. Goodbye!" << endl;
 			    exit(EXIT_SUCCESS);
 			    break;
-			default:
-			    cout << "Invalid option. Please select a valid option." << endl;
-			    break;
+			}
+			    
+			default:{
+				cout << "Invalid option. Please select a valid option." << endl;
+			    break;	
+			}
+			    
 		};
 	}
 }
@@ -59,7 +70,7 @@ void ATM::login(string& username,string& password){
 	}
 }
 
-void ATM::signin(string& username,string& password){
+void ATM::signup(string& username,string& password){
 	int attempts = 5;
 	bool createuser_success = false;
 	while(attempts>0 && !createuser_success){

@@ -127,3 +127,23 @@ bool Database::loginUser(const string& username,const string& password){
     sqlite3_finalize(statement);
     return false;
 }
+
+int Database::getUserId(const string& username, const string& password) {
+    const char* getUserIdQuery = "SELECT user_id FROM client WHERE username=? AND password=?;";
+    sqlite3_stmt* statement;
+    int userId = -1; // Default value if user is not found
+
+    if (sqlite3_prepare_v2(db, getUserIdQuery, -1, &statement, 0) == SQLITE_OK) {
+        sqlite3_bind_text(statement, 1, username.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(statement, 2, password.c_str(), -1, SQLITE_STATIC);
+
+        if (sqlite3_step(statement) == SQLITE_ROW) {
+            // Retrieve the user ID from the query result
+            userId = sqlite3_column_int(statement, 0);
+        }
+    }
+
+    sqlite3_finalize(statement);
+    return userId;
+}
+

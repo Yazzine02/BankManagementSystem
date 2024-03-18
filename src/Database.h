@@ -2,7 +2,7 @@
 #define DATABASE_H
 
 #include <iostream>
-#include "sqlite3.h"
+#include <sqlite3.h>
 #include <string>
 #include "Logger.h"
 using namespace std;
@@ -22,6 +22,9 @@ public:
 	//USER AUTHENTICATION
 	bool createUser(const string& username,const string& password);
 	bool loginUser(const string& username,const string& password);
+	
+	//TOOLS
+	int getUserId(const string& username,const string& password);
 };
 
 #endif // DATABASE_H
