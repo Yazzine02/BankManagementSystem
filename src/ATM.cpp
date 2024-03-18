@@ -18,7 +18,7 @@ ATM::ATM(const string& dbPath,const string& errorLogPath,const string& successLo
 				login(username,password);
 				int user_id = db.getUserId(username,password);
 				if(user_id == -1)exit(EXIT_FAILURE);
-				Client client(user_id,username,password);
+				Client client(user_id,username,password,"/home/yazzine/Desktop/Projects/BankManagementSystem/DBMS/database","/home/yazzine/Desktop/Projects/BankManagementSystem/src/logError","/home/yazzine/Desktop/Projects/BankManagementSystem/src/logSuccess");
 				client_interface(client);
 				continue_loop=false;
 				break;
@@ -28,7 +28,7 @@ ATM::ATM(const string& dbPath,const string& errorLogPath,const string& successLo
 				signup(username,password);
 				int user_id = db.getUserId(username,password);
 				if(user_id == -1)exit(EXIT_FAILURE);
-				Client client(user_id,username,password);
+				Client client(user_id,username,password,"/home/yazzine/Desktop/Projects/BankManagementSystem/DBMS/database","/home/yazzine/Desktop/Projects/BankManagementSystem/src/logError","/home/yazzine/Desktop/Projects/BankManagementSystem/src/logSuccess");
 				client_interface(client);
 			    	continue_loop=false;
 			    	break;
@@ -48,7 +48,7 @@ ATM::ATM(const string& dbPath,const string& errorLogPath,const string& successLo
 		};
 	}
 }
-
+//AUTHENTICATION INTERFACES
 void ATM::login(string& username,string& password){
 	int attempts = 3;
 	bool login_success = false;
@@ -106,8 +106,8 @@ void ATM::client_interface(Client& client){
 		cout<<"Welcome Mr.Ms "<<client.get_username()<<endl;
 		cout<<"What can we do for you?" <<endl;
 		cout<<"1. Check credentials"<<endl;
-		//cout<<"2. Check balance"<<endl;
-		//cout<<"3. Deposit"<<endl;
+		cout<<"2. Check balance"<<endl;
+		cout<<"3. Deposit"<<endl;
 		//cout<<"4. Withdraw"<<endl;
 		cout<<"0. Exit"<<endl;
 		int option = 0;
@@ -120,18 +120,27 @@ void ATM::client_interface(Client& client){
 				break;
 			}
 				
-			/*case 2:{ //checking balance
-				
+			case 2:{ //checking balance
+				cout<<"Balance: MAD "<<client.get_balance()<<endl;
 			    	break;
 			}
 			
 			case 3:{ //deposit functionality
-				
+				DepositFunctionality(client);
 			    	break;
 			}
-			
+			/*
 			case 4:{ //withdraw functionality
-				
+				double withdraw = 0;
+				cout<<"Balance: MAD "<<client.get_balance()<<endl;
+				cout<<"Enter the ammount you want to withdraw: "<<endl;
+				if(withdraw>=0 && withdraw<=client.get_balance()){
+					double new_balance = client.get_balance()-withdraw; 
+					client.set_balance(new_balance);
+			    		client.db.set_balance(new_balance);
+			    		cout<<"Withdrawn "<<withdraw<<" MAD successfully"<<end;
+			    		cout<<"Balance: MAD "<<client.get_balance();
+				}else cout<<"Enter a positive number!"<<endl;
 			    	break;
 			}
 			*/   
@@ -147,4 +156,17 @@ void ATM::client_interface(Client& client){
 			}
 		}
 	}
+}
+
+//CLIENT FUNCTIONALITIES
+void ATM::DepositFunctionality(Client& client){
+	double deposit = 0;
+	cout<<"Balance: MAD "<<client.get_balance()<<endl;
+	cout<<"Enter the ammount you want to deposit: "<<endl;
+	cin>>deposit;
+	cin.ignore();
+	if(deposit>=0){
+		double new_balance = deposit + client.get_balance();
+		client.Deposit(new_balance,client.get_userid());
+	}else cout<<"Enter a positive number!"<<endl;	
 }

@@ -25,6 +25,8 @@ public:
 	
 	//TOOLS
 	int getUserId(const string& username,const string& password);
+	double getBalance(const int& id);
+	void setBalance(const double& new_balance,const int& id);
 };
 
 #endif // DATABASE_H

@@ -14,18 +14,20 @@ class ATM{
 	public:
 		//Constructor
 		ATM(const string& dbPath,const string& errorLogPath,const string& successLogPath);
-		//authentication interfaces
+		//AUTHENTICATION INTERFACES
 		void login(string& username,string& password);
 		void signup(string& username,string& password);
 		void logout();
-		//Utility Interfaces
+		//UTILITY INTERFACES
 		//void Balance()const;
 		//void Deposit();
 		//void Borrow();
 		//void ReturnLoan();
 		//void Withdraw();
 		void client_interface(Client& client);
-
+		
+		//CLIENT FUNCTIONALITIES
+		void DepositFunctionality(Client& client);
 };
 
 #endif

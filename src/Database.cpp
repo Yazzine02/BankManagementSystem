@@ -29,6 +29,12 @@ Database::~Database() {
     5-Reset the prepared statement using sqlite3_reset() then go back to step 2. Do this zero or more times.
     6-Destroy the object using sqlite3_finalize().
 */
+
+/*
+	When using sqlite3_step:
+		SQLITE_DONE if not expecting a result
+		SQLITE_ROW if expecting a result
+*/
 bool Database::isUsernameTaken(const string& username){//true if username taken
     const char* checkUsernameQuery = "SELECT COUNT(*) FROM Client WHERE username=?;";
     sqlite3_stmt* statement;//step 1
@@ -150,6 +156,7 @@ bool Database::loginUser(const string& username,const string& password){
     return false;
 }
 
+//TOOLS
 int Database::getUserId(const string& username, const string& password) {
     const char* getUserIdQuery = "SELECT user_id FROM client WHERE username=? AND password=?;";
     sqlite3_stmt* statement;
@@ -169,3 +176,41 @@ int Database::getUserId(const string& username, const string& password) {
     return userId;
 }
 
+double Database::getBalance(const int& id){
+	const char* getBalanceQuery = "SELECT balance FROM account where account_id=?;";
+	sqlite3_stmt* statement;
+	double balance=0;
+	
+	if(sqlite3_prepare_v2(db,getBalanceQuery,-1,&statement,0)==SQLITE_OK){
+		sqlite3_bind_int(statement,1,id);
+		if(sqlite3_step(statement)==SQLITE_ROW){
+			balance = sqlite3_column_double(statement,0);
+		}
+	}else{
+		cerr<<"Error: couldn't get balance."<<sqlite3_errmsg(db)<<endl;
+	}
+	sqlite3_finalize(statement);
+    	return balance;
+}
+
+void Database::setBalance(const double& new_balance, const int& id) {
+    const char* setBalanceQuery = "UPDATE Account SET balance=? WHERE account_id=?;";
+    sqlite3_stmt* statement;
+
+    if (sqlite3_prepare_v2(db, setBalanceQuery, -1, &statement, 0) == SQLITE_OK) {
+        sqlite3_bind_double(statement, 1, new_balance);
+        sqlite3_bind_int(statement, 2, id);
+        
+        if (sqlite3_step(statement) != SQLITE_DONE) {
+            cerr << "Error updating balance." << endl;
+            logger.logError("Error updating balance.");
+        }else{
+            logger.logSuccess("Balance updated successfully for account ID: " + to_string(id));
+        }
+    } else {
+        cerr << "Error preparing statement: " << sqlite3_errmsg(db) << endl;
+        logger.logError("Error preparing statement: " + string(sqlite3_errmsg(db)));
+    }
+
+    sqlite3_finalize(statement);
+}
