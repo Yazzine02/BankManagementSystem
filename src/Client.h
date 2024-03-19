@@ -34,7 +34,7 @@ public:
 	void Deposit(const double& new_balance,const int& id);
 	//bool Borrow();
 	//bool ReturnLoan();
-	//bool Withdraw();
+	void Withdraw(const double& withdraw,const int& id);
 	//bool Deposit();
 	//void Checkinfo()const;
 };

@@ -28,6 +28,7 @@ class ATM{
 		
 		//CLIENT FUNCTIONALITIES
 		void DepositFunctionality(Client& client);
+		void WithdrawFunctionality(Client& client);
 };
 
 #endif

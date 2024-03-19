@@ -32,8 +32,22 @@ void Client::set_balance(const double& new_balance){
 	balance=new_balance;
 }
 
-void Client::Deposit(const double& new_balance,const int& id){
-	set_balance(new_balance);
-	db.setBalance(new_balance,id);
-	cout<<"Balance: MAD "<<get_balance()<<endl;
+void Client::Deposit(const double& deposit,const int& id){
+	if(deposit>=0){
+		double new_balance = deposit + get_balance();
+		set_balance(new_balance);
+		db.setBalance(new_balance,id);
+		cout<<"Balance: MAD "<<get_balance()<<endl;
+	}else cout<<"Enter a positive number!"<<endl;
+}
+
+void Client::Withdraw(const double& withdraw,const int& id){
+	if(withdraw>0 && withdraw<=get_balance()){
+		double new_balance = get_balance()-withdraw;
+		set_balance(new_balance);
+		db.setBalance(new_balance,id);
+		cout<<"Balance: MAD "<<get_balance()<<endl;
+	}else{
+		cout<<"You cannot withdraw this ammount."<<endl;
+	}
 }

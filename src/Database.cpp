@@ -214,3 +214,5 @@ void Database::setBalance(const double& new_balance, const int& id) {
 
     sqlite3_finalize(statement);
 }
+
+

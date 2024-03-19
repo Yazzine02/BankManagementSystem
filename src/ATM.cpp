@@ -108,7 +108,7 @@ void ATM::client_interface(Client& client){
 		cout<<"1. Check credentials"<<endl;
 		cout<<"2. Check balance"<<endl;
 		cout<<"3. Deposit"<<endl;
-		//cout<<"4. Withdraw"<<endl;
+		cout<<"4. Withdraw"<<endl;
 		cout<<"0. Exit"<<endl;
 		int option = 0;
 		cin >> option;
@@ -129,21 +129,10 @@ void ATM::client_interface(Client& client){
 				DepositFunctionality(client);
 			    	break;
 			}
-			/*
 			case 4:{ //withdraw functionality
-				double withdraw = 0;
-				cout<<"Balance: MAD "<<client.get_balance()<<endl;
-				cout<<"Enter the ammount you want to withdraw: "<<endl;
-				if(withdraw>=0 && withdraw<=client.get_balance()){
-					double new_balance = client.get_balance()-withdraw; 
-					client.set_balance(new_balance);
-			    		client.db.set_balance(new_balance);
-			    		cout<<"Withdrawn "<<withdraw<<" MAD successfully"<<end;
-			    		cout<<"Balance: MAD "<<client.get_balance();
-				}else cout<<"Enter a positive number!"<<endl;
+				WithdrawFunctionality(client);
 			    	break;
 			}
-			*/   
 			case 0:{ //exit program
 				cout << "Exiting the program. Goodbye!" << endl;
 			    	exit(EXIT_SUCCESS);
@@ -165,8 +154,15 @@ void ATM::DepositFunctionality(Client& client){
 	cout<<"Enter the ammount you want to deposit: "<<endl;
 	cin>>deposit;
 	cin.ignore();
-	if(deposit>=0){
-		double new_balance = deposit + client.get_balance();
-		client.Deposit(new_balance,client.get_userid());
-	}else cout<<"Enter a positive number!"<<endl;	
+	client.Deposit(deposit,client.get_balance());	
+}
+
+void ATM::WithdrawFunctionality(Client& client){
+	//void Withdraw(const double& withdraw,const int& id)
+	double withdraw = 0;
+	cout<<"Balance: MAD "<<client.get_balance()<<endl;
+	cout<<"Enter the ammount you want to withdraw: "<<endl;
+	cin>>withdraw;
+	cin.ignore();
+	client.Withdraw(withdraw,client.get_userid());
 }
